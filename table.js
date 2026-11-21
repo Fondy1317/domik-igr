@@ -111,31 +111,118 @@ function puzzleGame(box){
     });
   }draw();
 }
-const sorterColors=['#ed6364','#67b876','#f4bb31'];
+const sortModes=['Цвет','Размер','Форма','Узоры','Количество','Группы'];
+const sortPrompts=['Разложи по цветам','Найди такой же размер','Найди такую же форму','Подбери такой же узор','Сколько на карточке?','Что к чему относится?'];
+const assortment=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8]];
+const smallerSets=[[0,1,2],[3,4,5],[0,2,4],[1,3,5],[0,3,5],[1,2,4]];
+const roundsPerSet=6, piecesPerRound=6;
+const sortSaveKey='sort-collections-v1';
+function newCollection(){
+  return {round:0,variant:Math.floor(Math.random()*30),order:shuffle([0,1,2,3,4,5]),placed:[]};
+}
+function usableCollection(s){
+  const validId=n=>Number.isInteger(n)&&n>=0&&n<piecesPerRound;
+  return s&&Number.isInteger(s.round)&&s.round>=0&&s.round<roundsPerSet&&Number.isInteger(s.variant)&&s.variant>=0&&
+    Array.isArray(s.order)&&s.order.length===6&&new Set(s.order).size===6&&s.order.every(validId)&&
+    Array.isArray(s.placed)&&s.placed.every(validId)&&new Set(s.placed).size===s.placed.length;
+}
+// One board has three destinations and two distinct pieces for each destination.
+function buildSortBoard(mode,s){
+  const {round,variant}=s;
+  const targets=[],pieces=[];
+  const palette=i=>sortPalette[i%sortPalette.length][1];
+  const objects=sortFamilies.flatMap(group=>group.members);
+  const ordinal=round+variant;
+  function addGroup(name,art,makePiece){
+    const group=targets.length;
+    targets.push({name,art,group});
+    for(let pair=0;pair<2;pair++)pieces.push({...makePiece(pair),group});
+  }
+  for(let i=0;i<3;i++){
+    const key=assortment[round][i],small=smallerSets[round][i];
+    if(mode===0){
+      const [name,color]=sortPalette[key];
+      addGroup(name,toyBasket(color),pair=>{
+        const [shape,label]=objects[(ordinal*4+i*2+pair)%objects.length];
+        return {name:label+' · '+name,art:sortToy(shape,color)};
+      });
+    }else if(mode===1){
+      const name=['Маленький','Средний','Большой'][i],size=[.45,.73,1.04][i];
+      const shape=['apple','shirt','car','mitten','pear','hat'][ordinal%6];
+      addGroup(name,sortToy(shape,'#bc9978',size,true),pair=>({name,art:sortToy(shape,palette(ordinal+pair),size)}));
+    }else if(mode===2){
+      const [shape,name]=sortShapes[key];
+      addGroup(name,sortToy(shape,'#ab97c0',1,true),pair=>({name,art:sortToy(shape,palette(ordinal+2*i+pair))}));
+    }else if(mode===3){
+      const name=patterns[small][0];
+      addGroup(name,fabric(small,'#74888f','patch'),pair=>({name,art:fabric(small,palette(ordinal+pair*3+i),pair?'mitten':'shirt')}));
+    }else if(mode===4){
+      const n=small+1,name=String(n);
+      const tile='<svg viewBox="0 0 100 100" aria-hidden="true"><rect x="9" y="8" width="82" height="84" rx="20" fill="#fff0bd" stroke="#c39862" stroke-width="3"/><text x="50" y="73" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="950" font-size="67" fill="#4a506e">'+n+'</text></svg>';
+      addGroup(name,tile,pair=>({name:'Карточка · '+n,art:countCard(n,['circle','star','heart'][(ordinal+pair)%3],palette(ordinal+i+pair))}));
+    }else{
+      const family=sortFamilies[i];
+      const example=family.members[ordinal%family.members.length];
+      addGroup(family.name,sortToy(example[0],example[2]),pair=>{
+        const [shape,name,color]=family.members[(ordinal+pair+1)%family.members.length];
+        return {name,art:sortToy(shape,color)};
+      });
+    }
+  }
+  if(round>0)targets.push(...targets.splice(0,round%3));
+  return {targets,pieces};
+}
 function sortGame(box){
-  let mode=0;
+  const saved=read(sortSaveKey,null);
+  const sets=sortModes.map((_,i)=>usableCollection(saved?.sets?.[i])?saved.sets[i]:newCollection());
+  let mode=validIndex(saved?.mode,sortModes.length),timer=0;
+  function persist(){save(sortSaveKey,{mode,sets})}
+  function nextBoard(state){
+    state.round++;state.order=shuffle([0,1,2,3,4,5]);state.placed=[];persist();draw();
+  }
   function draw(){
-    setupPicker(['Цвет','Размер','Форма'][mode],'options',()=>chooseOptions({title:'Как сортировать?',labels:['Цвет','Размер','Форма'],mode,onApply:opt=>{if(mode!==opt.mode){mode=opt.mode;draw()}}}));
-    const names=[['Красный','Зелёный','Жёлтый'],['Маленький','Средний','Большой'],['Круг','Звезда','Квадрат']][mode];
-    const shapes=['circle','star','square'],sizes=[.47,.76,1.05],fruit=shuffle(['apple','pear','car'])[0];
-    box.innerHTML='<div class="sort-layout" data-mode="'+mode+'"><div class="bins"></div><div class="tray sort-tray"></div></div>';
-    names.forEach((name,i)=>{
-      const t=document.createElement('button');t.className='bin';t.dataset.target=i;t.setAttribute('aria-label','Место — '+name);
-      t.innerHTML='<span class="bin-top">'+(mode===0?toyBasket(sorterColors[i]):toyObject(mode===1?fruit:shapes[i],mode===1?'#bc9978':'#a48ebd',mode===1?sizes[i]:1,true))+'</span><span class="bin-loot"></span><span class="bin-name">'+name+'</span>';
-      box.querySelector('.bins').append(t);
-    });
-    const order=shuffle([0,1,2,0,1,2]),fruits=shuffle(['apple','pear','car']);
-    order.forEach((i,j)=>{
-      const b=document.createElement('button');b.className='sort-item';b.dataset.piece=i;b.setAttribute('aria-label','Предмет — '+names[i]);
-      b.innerHTML=mode===0?toyObject(fruits[j%3],sorterColors[i]):mode===1?toyObject(fruit,'#e99d50',sizes[i]):toyObject(shapes[i],sorterColors[j%3]);
-      box.querySelector('.tray').append(b);
-    });
-    let left=order.length;
+    clearTimeout(timer);
+    const state=sets[mode],lastRound=state.round===roundsPerSet-1;
+    if(state.placed.length===piecesPerRound&&!lastRound){nextBoard(state);return}
+    setupPicker(sortModes[mode],'options',()=>chooseOptions({title:'Как сортировать?',labels:sortModes,mode,onApply:opt=>{
+      if(mode!==opt.mode){mode=opt.mode;persist();draw()}
+    }}));
+    const {targets,pieces}=buildSortBoard(mode,state);
+    box.innerHTML='<div class="sort-header"><span class="sort-instruction"></span><span class="sort-progress" role="status"></span></div><div class="sort-layout" data-mode="'+mode+'"><div class="bins"></div><div class="tray sort-tray"></div></div>';
+    box.querySelector('.sort-instruction').textContent=sortPrompts[mode];
+    const progress=box.querySelector('.sort-progress'),bins=box.querySelector('.bins'),tray=box.querySelector('.tray');
+    function updateProgress(){progress.textContent=(state.round*piecesPerRound+state.placed.length)+' / '+(roundsPerSet*piecesPerRound);progress.setAttribute('aria-label','Разложено '+progress.textContent)}
+    function arrived(pieceArt,t){
+      const toy=document.createElement('i');toy.className='collected';toy.append(freshCopy(pieceArt));t.querySelector('.bin-loot').append(toy);return toy;
+    }
+    for(const {name,art,group} of targets){
+      const t=document.createElement('button');t.className='bin';t.dataset.target=group;t.setAttribute('aria-label','Место — '+name);
+      t.innerHTML='<span class="bin-top">'+art+'</span><span class="bin-loot"></span><span class="bin-name">'+name+'</span>';bins.append(t);
+    }
+    for(const id of state.order){
+      const piece=pieces[id],el=document.createElement('button');el.className='sort-item';el.dataset.item=id;el.dataset.piece=piece.group;el.setAttribute('aria-label',piece.name);el.innerHTML=piece.art;tray.append(el);
+      if(state.placed.includes(id)){
+        arrived(el.firstElementChild,bins.querySelector('[data-target="'+piece.group+'"]'));el.disabled=true;el.style.visibility='hidden';el.removeAttribute('data-piece');
+      }
+    }
+    updateProgress();
+    function finish(){
+      if(lastRound){
+        tray.hidden=true;
+        complete(box,'Все 36 на месте!','Ещё набор',()=>{sets[mode]=newCollection();persist();draw()});
+      }else{
+        progress.textContent='Готово!';
+        timer=setTimeout(()=>nextBoard(state),750);
+      }
+    }
+    if(state.placed.length===piecesPerRound){finish();return}
     connectPieces(box,(p,t)=>{
-      const toy=document.createElement('i');toy.className='collected';toy.append(freshCopy(p.firstElementChild));t.querySelector('.bin-loot').append(toy);
+      const toy=arrived(p.firstElementChild,t);
+      state.placed.push(Number(p.dataset.item));persist();updateProgress();
       t.querySelector('.bin-top').animate([{transform:'scale(1)'},{offset:.5,transform:'translateY(4px) scale(1.05,.94)'},{transform:'scale(1)'}],{duration:reduceMotion()?0:300,delay:190});
-      if(--left===0)complete(box,'Всё по местам!','Ещё раз',draw);
+      if(state.placed.length===piecesPerRound)finish();
       return toy;
     });
-  }draw();
+  }
+  draw();cleanup=()=>clearTimeout(timer);
 }

@@ -22,6 +22,33 @@ function burst(field,x,y,color,label){
   if(label){const text=document.createElement('b');text.textContent=label;node.append(text)}
   field.append(node);setTimeout(()=>node.remove(),540);
 }
+function bugScoreboard(box,field){
+  const stored=read('bug-best-streak',0);
+  let score=0,streak=0,best=Number.isSafeInteger(stored)&&stored>=0?stored:0;
+  const board=document.createElement('div');
+  board.className='bug-scoreboard';board.setAttribute('role','group');board.setAttribute('aria-label','Результат ловли');
+  const marks=[
+    ['score','Счёт','<circle cx="12" cy="13" r="7"/><path d="M12 6v14m-6-10L3 8m3 8-3 2m15-8 3-2m-3 8 3 2M9 6l-2-3m8 3 2-3"/>'],
+    ['streak','Подряд','<path d="m13 2-9 12h7l-1 8 10-13h-7Z"/>'],
+    ['best','Лучшая серия','<path d="m3 7 5 4 4-7 4 7 5-4-2 12H5Zm3 15h12"/>']
+  ];
+  const values=marks.map(([key,label,drawing])=>{
+    const cell=document.createElement('span');cell.className='bug-stat stat-'+key;
+    cell.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none">'+drawing+'</svg><span>'+label+'</span><b data-stat="'+key+'">0</b>';
+    board.append(cell);return cell.lastElementChild;
+  });
+  values[2].textContent=best;box.insertBefore(board,field);
+  field.addEventListener('pointerdown',e=>{
+    if(e.isPrimary&&e.button===0&&e.target===field&&streak>0){streak=0;values[1].textContent='0'}
+  });
+  return function caught(){
+    streak++;
+    const points=streak%5===0?3:1;
+    score+=points;values[0].textContent=score;values[1].textContent=streak;
+    if(streak>best){best=streak;values[2].textContent=best;save('bug-best-streak',best)}
+    return points;
+  };
+}
 function movingGame(box,id){
   const balloons=id==='balloons',slow=reduceMotion();
   let mode=0,frame,resize,disposeRound=()=>{};
@@ -30,6 +57,7 @@ function movingGame(box,id){
     if(balloons)setupPicker(['Все шарики','Буквы','Цифры'][mode],'options',()=>chooseOptions({title:'Что на шариках?',labels:['Все','Буквы','Цифры'],mode,onApply:opt=>{if(mode!==opt.mode){mode=opt.mode;stopVoice();round()}}}));
     box.innerHTML='<div class="playfield field-'+id+'"></div>';
     const field=box.firstElementChild,actors=[],bags=[[],[]],pending=new Set();
+    const scoreHit=balloons?null:bugScoreboard(box,field);
     let width=field.clientWidth,height=field.clientHeight,variant=0,number=false,prev=performance.now(),running=true;
     resize=new ResizeObserver(()=>{width=field.clientWidth;height=field.clientHeight;
       for(const a of actors){a.x=Math.max(0,Math.min(width-a.w,a.x));a.y=Math.max(-a.h,Math.min(height-a.h,a.y));position(a)}
@@ -69,7 +97,7 @@ function movingGame(box,id){
       function hit(){
         const i=actors.indexOf(actor);if(i===-1||panel.open)return;
         balloons?speak(n):beep(300+Math.random()*130);actors.splice(i,1);
-        burst(field,actor.x+w*.5,actor.y+h*(balloons?.4:.5),color,balloons?letters[n]:'');
+        burst(field,actor.x+w*.5,actor.y+h*(balloons?.4:.5),color,balloons?letters[n]:'+'+scoreHit());
         const shell=el.firstElementChild;el.disabled=true;el.classList.add('caught');
         shell.animate(balloons?[{transform:'scale(1)'},{offset:.45,transform:'scale(1.1,.94)'},{transform:'scale(.48)',opacity:0}]:[{transform:'scale(1)'},{offset:.38,transform:'scale(1.13,.82)'},{transform:'scale(.65)',opacity:0}],{duration:slow?0:160,fill:'forwards'});
         const timer=setTimeout(()=>{pending.delete(timer);el.remove();spawn(actor)},slow?10:180);pending.add(timer);
