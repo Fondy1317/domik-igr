@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <title>Домик игр</title>
+  <defs>
+    <radialGradient id="sky" cx=".34" cy=".18" r=".99" gradientUnits="objectBoundingBox">
+      <stop stop-color="#91f5df"/><stop offset=".5" stop-color="#40cfbf"/><stop offset="1" stop-color="#1596a3"/>
+    </radialGradient>
+    <linearGradient id="wall" x2=".45" y2="1"><stop stop-color="#fff6bd"/><stop offset=".48" stop-color="#ffdf85"/><stop offset="1" stop-color="#f3aa48"/></linearGradient>
+    <linearGradient id="side" x2=".8" y2="1"><stop stop-color="#efa24b"/><stop offset="1" stop-color="#d97a37"/></linearGradient>
+    <linearGradient id="roof" x2=".47" y2="1"><stop stop-color="#ff9b75"/><stop offset=".45" stop-color="#ff665c"/><stop offset="1" stop-color="#df394f"/></linearGradient>
+    <linearGradient id="roofside" x2=".8" y2="1"><stop stop-color="#ff7971"/><stop offset=".67" stop-color="#f14d58"/><stop offset="1" stop-color="#d13f58"/></linearGradient>
+    <linearGradient id="light" x2=".25" y2="1"><stop stop-color="#fffbc3"/><stop offset=".48" stop-color="#ffe46a"/><stop offset="1" stop-color="#ffb73b"/></linearGradient>
+    <linearGradient id="glass" x2=".5" y2="1"><stop stop-color="#f5ffff"/><stop offset=".55" stop-color="#8ee8e5"/><stop offset="1" stop-color="#4bb7c4"/></linearGradient>
+    <linearGradient id="base" x2=".4" y2="1"><stop stop-color="#80e4a4"/><stop offset="1" stop-color="#35aa80"/></linearGradient>
+    <filter id="blur" x="-.3" y="-.8" width="1.6" height="2.6"><feGaussianBlur stdDeviation="7"/></filter>
+    <filter id="soft" x="-.2" y="-.2" width="1.4" height="1.5"><feDropShadow dx="0" dy="6" stdDeviation="4.5" flood-color="#216a75" flood-opacity=".29"/></filter>
+    <path id="spark" d="M0-14C2-5 4-3 11 0 4 2 2 5 0 13-2 5-4 2-11 0-4-3-2-5 0-14Z"/>
+  </defs>
+  <rect width="512" height="512" fill="url(#sky)"/>
+  <g fill="#e2fff1" opacity=".8"><use href="#spark" transform="translate(87 157) scale(.85)"/><use href="#spark" transform="translate(415 117) scale(.59)"/><circle cx="101" cy="134" r="3.5"/><circle cx="399" cy="133" r="2.7"/></g>
+  <g id="house">
+    <ellipse cx="257" cy="403" rx="150" ry="18" fill="#1e6f77" opacity=".32" filter="url(#blur)"/>
+    <g filter="url(#soft)" stroke-linejoin="round" stroke-linecap="round">
+      <!-- The plinth turns the house into a single freestanding toy. -->
+      <path d="m102 374 78-19 216 12q14 1 15 10v7q0 7-11 10l-62 16q-7 2-15 1l-206-14q-14-1-15-10Z" fill="#297f76" stroke="#377e68" stroke-width="4"/>
+      <path d="m105 375 70-18 220 12q16 2 7 10l-61 17q-9 3-21 2l-203-13q-17-1-12-10Z" fill="url(#base)" stroke="#4baf81" stroke-width="3"/>
+      <path d="m114 377 204 13q12 1 20-2" fill="none" stroke="#bcf1ac" stroke-width="5"/>
+      <!-- Sunlit front and warm right side. -->
+      <path d="m126 222 110-95 104 94-1 161-214-11Z" fill="url(#wall)" stroke="#af753d" stroke-width="5"/>
+      <path d="m337 218 55-11-2 160-52 15Z" fill="url(#side)" stroke="#ab6838" stroke-width="4"/>
+      <path d="m131 232 102-84 100 91v14l-99-88-103 86Z" fill="#e6ac54" opacity=".64"/>
+      <path d="m344 235 43-13v17l-43 12Z" fill="#ba713a" opacity=".55"/>
+      <path d="m131 250-1 114 199 12" fill="none" stroke="#ffedac" stroke-width="5" opacity=".72"/>
+      <!-- A red chimney, rounded along the lip. -->
+      <path d="m322 161 1-57 29-7 3 55Z" fill="#bd4052" stroke="#9e4550" stroke-width="4"/>
+      <path d="m324 157 1-50 12 1-1 39Z" fill="#fa705f"/>
+      <path d="m317 103 1-8 32-6 9 5-1 11-31 7Z" fill="#f46b61" stroke="#ab4953" stroke-width="4"/>
+      <path d="m322 97 25-4" stroke="#ffb18b" stroke-width="4"/>
+      <!-- Rounded overhanging roof, two visible planes. -->
+      <path d="m220 113 39-11q12-4 22 5l127 112q9 8 2 18l-35 10L238 136Z" fill="url(#roofside)" stroke="#a13d51" stroke-width="6"/>
+      <path d="m258 109 11-2q5 0 10 5l122 106" fill="none" stroke="#ffad88" stroke-width="6"/>
+      <path d="m333 180 22 19m-57-39 20 18" fill="none" stroke="#df4d55" stroke-width="5"/>
+      <path d="m92 222 129-110q11-9 23 0l133 114q10 9 2 19l-6 6q-7 7-16 0L233 146 112 249q-9 7-17-2l-7-8q-6-9 4-17Z" fill="url(#roof)" stroke="#a14150" stroke-width="6"/>
+      <path d="m98 225 125-106q8-7 15-2l48 41" fill="none" stroke="#ffc4a2" stroke-width="7"/>
+      <path d="m99 243 6 3 124-104q5-4 10 0l122 104" fill="none" stroke="#c94450" stroke-width="4"/>
+      <!-- Porthole and recessed split window. -->
+      <ellipse cx="234" cy="210" rx="18" ry="19" fill="#e2a456"/>
+      <ellipse cx="233" cy="205" rx="15" ry="16" fill="url(#glass)" stroke="#fff1b6" stroke-width="6"/>
+      <path d="m148 268q0-8 8-8l45 2q8 1 8 9v43q0 9-9 9l-44-2q-8-1-8-9Z" fill="#d38f47"/>
+      <path d="m151 261q0-8 8-8l42 2q8 0 8 8v45q0 8-8 8l-42-2q-8 0-8-8Z" fill="url(#glass)" stroke="#fff0b5" stroke-width="7"/>
+      <path d="m180 256-1 55m-24-28 50 2" fill="none" stroke="#ffedb1" stroke-width="6"/>
+      <path d="m146 315 67 3" stroke="#bd763d" stroke-width="8"/>
+      <path d="m146 312 67 3" stroke="#fff2b9" stroke-width="7"/>
+      <!-- Arched door glows like a little night light. -->
+      <path d="M229 373v-84q0-37 32-37 33 0 33 37v88Z" fill="#ab683b" stroke="#ba773f" stroke-width="6"/>
+      <path d="M235 372v-82q0-31 26-31 26 0 26 31v85Z" fill="url(#light)" stroke="#ffea9c" stroke-width="4"/>
+      <path d="M245 292q0-18 12-22" fill="none" stroke="#ffffd9" stroke-width="6"/>
+      <circle cx="276" cy="323" r="5" fill="#986548"/><circle cx="275" cy="321.5" r="2" fill="#d9a475"/>
+      <path d="m223 375 70 3 8 7-84-4Z" fill="#fff1ae" stroke="#c69256" stroke-width="3"/>
+      <path d="m346 354 34-10" fill="none" stroke="#edaa59" stroke-width="5"/>
+    </g>
+  </g>
+</svg>

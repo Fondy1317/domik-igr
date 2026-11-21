@@ -37,11 +37,40 @@ const books = [
     ['#ffc95a','M189 88a16 16 0 1 1-32 0 16 16 0 1 1 32 0Z'],
     ['#5e486e','M113 99q-8-25-17-25 10-3 20 22h8q9-25 20-22-10 2-17 26 8 9 4 42-2 24-11 28-10-4-12-30-3-31 5-41Z']]}
 ];
+books.push(
+  {name:'Лисёнок',sky:'#cbe2b2',parts:[
+    ['#e38c42','M141 185Q196 201 208 138Q235 183 193 207Q164 220 131 207Z'],
+    ['#fff2d4','M199 165Q208 146 208 138Q222 161 217 178L211 173 207 179 205 171Z'],
+    ['#ed9750','M78 198Q74 148 108 127H135Q168 154 160 204Q117 216 78 198Z'],
+    ['#ffe5c0','M96 156Q112 147 133 152Q156 177 140 203Q111 210 97 197Q89 175 96 156Z'],
+    ['#e5914a','M58 96 50 32Q77 40 99 63Q118 57 142 62Q165 40 190 31L184 101Q192 128 151 146L120 161 81 145Q48 128 58 96Z'],
+    ['#f7bb99','M65 78 59 45Q79 55 88 67Z'],
+    ['#f7bb99','M153 67 181 45 176 80Z'],
+    ['#fff0cf','M56 108Q83 102 120 135Q155 103 185 105Q183 133 147 148L120 161 81 145Q59 133 56 108Z'],
+    ['#56414a','M86 99a5 6 0 1 0 10 0 5 6 0 1 0-10 0Z'],
+    ['#56414a','M146 99a5 6 0 1 0 10 0 5 6 0 1 0-10 0Z'],
+    ['#584149','M111 131Q120 125 129 131Q127 140 120 141Q113 139 111 131Z']]},
+  {name:'Паровоз',sky:'#c1e6ef',parts:[
+    ['#fff4d7','M121 39Q108 41 108 32Q105 23 118 22Q128 9 141 21Q158 16 161 29Q169 39 154 45Q138 49 121 39Z'],
+    ['#32a49a','M31 161V80H94V159Z'],['#ea7767','M24 83V69Q25 63 31 63H94Q100 63 102 71V83Z'],
+    ['#b6ebed','M45 93H79V120H45Z'],['#e99b54','M94 109H163Q182 109 182 125V158H94Z'],
+    ['#de7360','M139 108V72H157V108Z'],['#e68e59','M132 75V62H163V75Z'],
+    ['#6baaaf','M27 151H184L205 176H28Z'],
+    ['#796c8b','M81 172a19 19 0 1 1-38 0 19 19 0 1 1 38 0Z'],
+    ['#796c8b','M139 172a19 19 0 1 1-38 0 19 19 0 1 1 38 0Z'],
+    ['#796c8b','M178 176a14 14 0 1 1-28 0 14 14 0 1 1 28 0Z'],
+    ['#ffdf83','M60 167 121 167Q128 167 127 174Q126 178 120 178H61Q54 178 54 173Q54 167 60 167Z']]}
+);
+const scenery=[
+  '<g fill="#fff8d8"><circle cx="20" cy="97" r="2"/><circle cx="48" cy="20" r="2"/><circle cx="173" cy="34" r="2.5"/><circle cx="204" cy="186" r="3"/><circle cx="52" cy="204" r="2"/></g><g transform="rotate(-16 38 162)"><ellipse cx="38" cy="162" rx="14" ry="12" fill="#e6a8bb"/><ellipse cx="38" cy="162" rx="23" ry="5" fill="none" stroke="#fff0ca" stroke-width="3"/></g>',
+  '<path d="M0 215Q58 196 122 215T240 205V240H0Z" fill="#e6d0a0"/><g fill="none" stroke="#73c5b2" stroke-width="5" stroke-linecap="round"><path d="M14 221q15-18 3-38m7 37q21-15 13-27m164 22q-1-22 13-36"/></g>',
+  '<path d="M0 140Q45 102 100 147T240 134V240H0Z" fill="#a2d983"/><path d="M0 25q8-13 18-4 13-19 30 1 13 1 15 11H0Z" fill="#fff5dd"/>',
+  '<g fill="none" stroke="#b0d48c" stroke-width="5"><path d="M0 210Q26 193 30 157M213 240Q209 204 236 177"/></g>',
+  '<path d="M0 169Q42 140 80 170T160 174T240 160V240H0Z" fill="#9dcd99"/><path d="M13 148q18-12 20-29-20 2-20 29m194 52q26-5 29-27-24 2-29 27" fill="#7ab98a"/>',
+  '<path d="M0 165Q46 122 113 154T240 135V240H0Z" fill="#9dd19c"/><path d="M0 198H240M0 208H240" stroke="#a5886c" stroke-width="4"/><path d="M0 216H240" stroke="#dbc39a" stroke-width="7" stroke-dasharray="16 6"/>'
+];
 function picture(index, kind='color', fills={}) {
   const b=books[index];
   const parts=b.parts.map(([c,d],i)=>`<path data-area="${i}" d="${d}" fill="${kind==='outline'?'none':kind==='page'?(fills[i]||'white'):c}"/>`).join('');
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" aria-hidden="true"><rect width="240" height="240" fill="${kind==='color'?b.sky:kind==='page'?(fills.bg||'white'):'none'}" data-area="bg"/><g stroke="#504665" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">${parts}</g></svg>`;
-}
-function pictureURL(index) {
-  return 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(picture(index)).replaceAll("'",'%27');
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" aria-hidden="true"><rect width="240" height="240" fill="${kind==='color'?b.sky:kind==='page'?(fills.bg||'white'):'none'}" data-area="bg"/>${kind==="color"?scenery[index]:""}<g stroke="#504665" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">${parts}</g></svg>`;
 }
